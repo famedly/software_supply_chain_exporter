@@ -1,0 +1,11 @@
+---
+on:
+  push:
+    branches: [main]
+    tags: ['*']
+  pull_request:
+
+jobs:
+  build:
+    uses: famedly/github-workflows/.github/workflows/rust.yml@main
+    secrets: inherit

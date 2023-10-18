@@ -1,8 +1,26 @@
 [package]
-name = "unnamed_syftgrype_tooling"
+name = "software_supply_chain_exporter"
 version = "0.1.0"
+authors = ["Samantha Yilmaz", "Jan Christian Grünhage"]
 edition = "2021"
+description = "SBOM and vulnerability metrics for node_exporter textfile collection"
+repository = "https://github.com/famedly/software_supply_chain_exporter"
+license = "AGPL-3.0-only"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1.0.75"
+bollard = { version = "0.15" }
+clap = { version = "4.4.7", features = ["derive", "wrap_help"] }
+humantime = "2.1.0"
+humantime-serde = "1.1.1"
+itertools = "0.11.0"
+prometheus-client = { version = "0.21.2" }
+serde = { version = "1.0.189", features = ["derive"] }
+serde_json = { version = "1.0.107" }
+serde_yaml = "0.9.25"
+tokio = { version = "1.33.0", features = ["rt", "process", "macros", "io-util"] }
+tracing = "0.1.40"
+tracing-subscriber = "0.3.17"
+walkdir = "2.4.0"

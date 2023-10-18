@@ -1,0 +1,8 @@
+base_path: /tmp/ssce
+cache_duration: 1w
+excludes:
+  - /var
+  - /home
+  - /proc
+  - /sys
+  - /dev
