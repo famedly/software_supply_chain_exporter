@@ -1,8 +1,13 @@
 [package]
-name = "unnamed_syftgrype_tooling"
+name = "software_supply_chain_exporter"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+tokio = { version = "1.33.0", features = ["rt", "process", "macros"] }
+bollard = { version = "0.15" }
+prometheus-client = { version = "0.21.2" }
+serde = { version = "1.0.189", features = ["derive"] }
+serde_json = { version = "1.0.107" }
