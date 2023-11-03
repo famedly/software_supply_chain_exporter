@@ -12,6 +12,12 @@ use crate::config::Source;
 pub async fn scan(sboms: &HashMap<Source, Value>) -> Result<HashMap<Source, Scan>> {
     let mut scans = HashMap::new();
     let mut set = JoinSet::new();
+    Command::new("grype")
+        .arg("db")
+        .arg("update")
+        .arg("--quiet")
+        .spawn()?.wait().await?;
+
     for (source, sbom) in sboms {
         set.spawn(scan_single(source.clone(), sbom.clone()));
     }
@@ -38,6 +44,7 @@ async fn scan_single(source: Source, sbom: Value) -> Result<(Source, Scan)> {
         .arg("--quiet") // Supress non-error output
         .arg("-o")
         .arg("json")
+        .env("GRYPE_DB_AUTO_UPDATE", "false")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .spawn()?;
