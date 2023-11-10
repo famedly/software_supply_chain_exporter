@@ -1,6 +1,6 @@
 [package]
 name = "software_supply_chain_exporter"
-version = "0.1.0"
+version = "0.1.2"
 authors = ["Samantha Yilmaz", "Jan Christian Grünhage"]
 edition = "2021"
 description = "SBOM and vulnerability metrics for node_exporter textfile collection"
