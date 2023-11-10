@@ -2,7 +2,7 @@ use std::{collections::HashMap, process::Stdio};
 
 use anyhow::Result;
 use serde_json::Value;
-use tokio::{io::AsyncWriteExt, process::Command, task::JoinSet};
+use tokio::{io::AsyncWriteExt, process::Command};
 use tracing::debug;
 
 use crate::config::Source;
@@ -11,7 +11,6 @@ use crate::config::Source;
 /// Just as with syft, grype doesn't take multiple inputs at once, so once again we loop.
 pub async fn scan(sboms: &HashMap<Source, Value>) -> Result<HashMap<Source, Scan>> {
     let mut scans = HashMap::new();
-    let mut set = JoinSet::new();
     Command::new("grype")
         .arg("db")
         .arg("update")
@@ -19,16 +18,13 @@ pub async fn scan(sboms: &HashMap<Source, Value>) -> Result<HashMap<Source, Scan
         .spawn()?.wait().await?;
 
     for (source, sbom) in sboms {
-        set.spawn(scan_single(source.clone(), sbom.clone()));
-    }
+        let res = scan_single(source.clone(), sbom.clone()).await;
 
-    while let Some(res) = set.join_next().await {
         match res {
-            Err(e) => println!("Failed to join task: {e}"),
-            Ok(Err(e)) => {
+            Err(e) => {
                 println!("Failed to scan an sbom: {e}")
             }
-            Ok(Ok((source, scan))) => {
+            Ok((source, scan)) => {
                 scans.insert(source, scan);
             }
         }
