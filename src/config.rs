@@ -7,6 +7,7 @@ use serde::Deserialize;
 #[derive(Deserialize, Clone, Debug)]
 pub struct Config {
     pub base_path: PathBuf,
+    pub metrics_path: Option<PathBuf>,
     #[serde(with = "humantime_serde")]
     pub cache_duration: Duration,
     pub excludes: Vec<PathBuf>,
@@ -22,7 +23,11 @@ impl Config {
         }
     }
     pub fn metrics_path(&self) -> PathBuf {
-        self.base_path.join("metrics/metrics.prom")
+        if let Some(metrics_path) = self.metrics_path.as_deref() {
+            metrics_path.into()
+        } else {
+            self.base_path.join("metrics/metrics.prom")
+        }
     }
 }
 
