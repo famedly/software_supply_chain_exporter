@@ -32,16 +32,11 @@ pub async fn create_sboms(
     sources: &Vec<Source>,
 ) -> Result<HashMap<Source, Value>> {
     let mut sboms = HashMap::new();
-    let mut set = JoinSet::new();
     for source in sources {
-        set.spawn(create_sbom(config.clone(), source.clone()));
-    }
-
-    while let Some(res) = set.join_next().await {
+        let res = create_sbom(config.clone(), source.clone()).await;
         match res {
-            Err(e) => println!("Error joining tasks: {e:?}"),
-            Ok(Err(e)) => println!("Error creating sbom: {e:?}"),
-            Ok(Ok((source, sbom))) => {
+            Err(e) => println!("Error creating sbom: {e:?}"),
+            Ok((source, sbom)) => {
                 sboms.insert(source, sbom);
             }
         }
@@ -74,7 +69,8 @@ async fn create_sbom(config: Config, source: Source) -> Result<(Source, Value)> 
         .arg("-o")
         .arg("json")
         .arg("--catalogers")
-        .arg("all");
+        .arg("all")
+        .env("SYFT_PARALLELISM", "1");
 
     if matches!(source, Source::HostDirectory { .. }) {
         debug!("we're running against a host directory, append excludes from the config file");
