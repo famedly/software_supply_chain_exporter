@@ -74,7 +74,8 @@ async fn create_sbom(config: Config, source: Source) -> Result<(Source, Value)> 
         .arg("-o")
         .arg("json")
         .arg("--catalogers")
-        .arg("all");
+        .arg("all")
+        .env("SYFT_PARALLELISM", "1");
 
     if matches!(source, Source::HostDirectory { .. }) {
         debug!("we're running against a host directory, append excludes from the config file");

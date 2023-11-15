@@ -20,7 +20,7 @@ async fn main() -> Result<()> {
 
     info!("Fetching docker images that are used in containers from docker");
     let mut sources = get_docker_images().await?;
-    sources.push(Source::HostDirectory { path: "/".into() });
+    // sources.push(Source::HostDirectory { path: "/".into() });
 
     info!("Start generating SBOMs");
     let sboms = create_sboms(&config, &sources).await?;
