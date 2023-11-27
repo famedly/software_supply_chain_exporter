@@ -7,5 +7,7 @@ on:
 
 jobs:
   build:
-    uses: famedly/github-workflows/.github/workflows/rust.yml@main
+    uses: famedly/github-workflows/.github/workflows/rust.yml@sammy/dependencies
+    with:
+      extra_build_dependencies: 'openssl vim'
     secrets: inherit
