@@ -6,7 +6,7 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use serde_json::Value;
 use tokio::process::Command;
 use tracing::debug;
@@ -45,6 +45,17 @@ pub async fn create_sboms(
     Ok(sboms)
 }
 
+async fn get_sbom(sbom_path: PathBuf) -> Result<Value> {
+    if std::fs::metadata(&sbom_path).is_ok() {
+        debug!("found cached sbom, reading and parsing it now");
+        let sbom_file = File::open(&sbom_path)?;
+        let parsed_sbom = serde_json::from_reader(sbom_file)?;
+        Ok(parsed_sbom)
+    } else {
+        Err(anyhow!("sbom not found"))
+    }
+}
+
 #[tracing::instrument(skip(config))]
 async fn create_sbom(config: Config, source: Source) -> Result<(Source, Value)> {
     let source = source.clone();
@@ -52,15 +63,14 @@ async fn create_sbom(config: Config, source: Source) -> Result<(Source, Value)> 
         Source::DockerImage { ref name, id: _ } => (name.into(), config.sbom_path(&source)),
         Source::HostDirectory { ref path } => (path.into(), config.sbom_path(&source)),
     };
+
     if let Some(sbom_path) = sbom_path.clone() {
         debug!("sbom is cacheable, checking for cached result");
-        if std::fs::metadata(&sbom_path).is_ok() {
-            debug!("found cached sbom, reading and parsing it now");
-            let sbom_cache_file = File::open(&sbom_path)?;
-            let parsed_cache = serde_json::from_reader(sbom_cache_file)?;
+        if let Ok(parsed_cache) = get_sbom(sbom_path).await {
             return Ok((source, parsed_cache));
         }
     }
+
     debug!("not using cached sbom, preparing to run syft against source");
     let mut command = Command::new("syft");
     command
