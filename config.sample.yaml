@@ -6,3 +6,4 @@ excludes:
   - /proc
   - /sys
   - /dev
+generate_sboms: true 

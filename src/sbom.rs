@@ -33,11 +33,21 @@ pub async fn create_sboms(
 ) -> Result<HashMap<Source, Value>> {
     let mut sboms = HashMap::new();
     for source in sources {
-        let res = create_sbom(config.clone(), source.clone()).await;
-        match res {
-            Err(e) => println!("Error creating sbom: {e:?}"),
-            Ok((source, sbom)) => {
-                sboms.insert(source, sbom);
+        if config.generate_sboms {
+            let res = create_sbom(config.clone(), source.clone()).await;
+            match res {
+                Err(e) => println!("Error creating sbom: {e:?}"),
+                Ok((source, sbom)) => {
+                    sboms.insert(source, sbom);
+                }
+            }
+        } else if let Some(sbom_path) = config.sbom_path(source) {
+            let res = get_sbom(sbom_path).await;
+            match res {
+                Err(e) => println!("Error loading sbom: {e:?}"),
+                Ok(sbom) => {
+                    sboms.insert(source.clone(), sbom);
+                }
             }
         }
     }

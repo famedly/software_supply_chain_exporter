@@ -11,6 +11,7 @@ pub struct Config {
     #[serde(with = "humantime_serde")]
     pub cache_duration: Duration,
     pub excludes: Vec<PathBuf>,
+    pub generate_sboms: bool,
 }
 
 impl Config {
