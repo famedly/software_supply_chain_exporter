@@ -14,15 +14,16 @@ use walkdir::WalkDir;
 
 use crate::config::{Config, Source};
 
+#[allow(non_snake_case)]
 #[derive(Clone, Debug, Hash, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct SbomEntry {
     pub name: String,
-    pub version: String,
+    pub versionInfo: String,
 }
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct Sbom {
-    pub artifacts: Vec<SbomEntry>,
+    pub packages: Vec<SbomEntry>,
 }
 
 /// Call syft for all running containers and create JSON SBOM.
@@ -87,7 +88,7 @@ async fn create_sbom(config: Config, source: Source) -> Result<(Source, Value)> 
         .arg("packages")
         .arg("--quiet") // Supress non-error output
         .arg("-o")
-        .arg("json")
+        .arg("spdx-json")
         .arg("--catalogers")
         .arg("all")
         .env("SYFT_PARALLELISM", "1");

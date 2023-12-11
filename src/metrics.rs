@@ -33,12 +33,12 @@ pub fn export_metrics(
 
     for (source, sbom) in sboms {
         let sbom: Sbom = serde_json::from_value(sbom)?;
-        for entry in sbom.artifacts {
+        for entry in sbom.packages {
             let source = source.clone().into();
             syft_metrics
                 .get_or_create(&SbomLabels {
                     software: entry.name,
-                    version: entry.version,
+                    version: entry.versionInfo,
                     source,
                 })
                 .inc();
