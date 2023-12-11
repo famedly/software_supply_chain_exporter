@@ -6,7 +6,7 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use serde_json::Value;
 use tokio::process::Command;
 use tracing::debug;
@@ -58,6 +58,7 @@ pub async fn create_sboms(
     Ok(sboms)
 }
 
+#[tracing::instrument(skip(sbom_path))]
 async fn get_sbom(scan_target: OsString, sbom_path: PathBuf) -> Result<Value> {
     if std::fs::metadata(&sbom_path).is_ok() {
         debug!("found cached sbom, reading and parsing it now");
@@ -79,13 +80,18 @@ async fn get_sbom(scan_target: OsString, sbom_path: PathBuf) -> Result<Value> {
             .arg("inspect")
             .arg(scan_target)
             .arg("--format")
-            .arg(format!("{{{{ json (index .SBOM \"{arch}\").SPDX }}}}"));
+            .arg("{{ json .SBOM }}");
 
         let output = command.output().await?;
+        let output: Value = serde_json::from_slice(&output.stdout)?;
 
-        let parsed_output: Value = serde_json::from_slice(&output.stdout)?;
+        let parsed_output = match output.get(arch) {
+            Some(v) => v.get("SPDX"),
+            None => output.get("SPDX"),
+        }
+        .context("Image does not have compatible sbom attestation")?;
 
-        Ok(parsed_output)
+        Ok(parsed_output.to_owned())
     }
 }
 
