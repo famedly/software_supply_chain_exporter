@@ -18,6 +18,7 @@ use crate::config::{Config, Source};
 #[derive(Clone, Debug, Hash, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct SbomEntry {
     pub name: String,
+    #[serde(default)]
     pub versionInfo: String,
 }
 

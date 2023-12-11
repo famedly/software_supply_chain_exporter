@@ -35,6 +35,7 @@ pub fn export_metrics(
         let sbom: Sbom = serde_json::from_value(sbom)?;
         for entry in sbom.packages {
             let source = source.clone().into();
+            if entry.versionInfo.is_empty() { continue };
             syft_metrics
                 .get_or_create(&SbomLabels {
                     software: entry.name,
