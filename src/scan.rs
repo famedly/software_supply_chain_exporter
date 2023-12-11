@@ -15,7 +15,9 @@ pub async fn scan(sboms: &HashMap<Source, Value>) -> Result<HashMap<Source, Scan
         .arg("db")
         .arg("update")
         .arg("--quiet")
-        .spawn()?.wait().await?;
+        .spawn()?
+        .wait()
+        .await?;
 
     for (source, sbom) in sboms {
         let res = scan_single(source.clone(), sbom.clone()).await;
