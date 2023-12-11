@@ -6,7 +6,7 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use serde_json::Value;
 use tokio::process::Command;
 use tracing::debug;
@@ -42,8 +42,10 @@ pub async fn create_sboms(
                     sboms.insert(source, sbom);
                 }
             }
-        } else if let Some(sbom_path) = config.sbom_path(source) {
-            let res = get_sbom(sbom_path).await;
+        } else if let (Source::DockerImage { ref name, id: _ }, Some(sbom_path)) =
+            (source, config.sbom_path(source))
+        {
+            let res = get_sbom(name.into(), sbom_path).await;
             match res {
                 Err(e) => println!("Error loading sbom: {e:?}"),
                 Ok(sbom) => {
@@ -56,14 +58,34 @@ pub async fn create_sboms(
     Ok(sboms)
 }
 
-async fn get_sbom(sbom_path: PathBuf) -> Result<Value> {
+async fn get_sbom(scan_target: OsString, sbom_path: PathBuf) -> Result<Value> {
     if std::fs::metadata(&sbom_path).is_ok() {
         debug!("found cached sbom, reading and parsing it now");
         let sbom_file = File::open(&sbom_path)?;
         let parsed_sbom = serde_json::from_reader(sbom_file)?;
         Ok(parsed_sbom)
     } else {
-        Err(anyhow!("sbom not found"))
+        debug!("Trying to get sbom from image attestations");
+        let mut command = Command::new("docker");
+        let arch = match std::env::consts::ARCH {
+            "x86_64" => "linux/amd64",
+            "aarch64" => "linux/arm64",
+            _ => "",
+        };
+
+        command
+            .arg("buildx")
+            .arg("imagetools")
+            .arg("inspect")
+            .arg(scan_target)
+            .arg("--format")
+            .arg(format!("{{{{ json (index .SBOM \"{arch}\").SPDX }}}}"));
+
+        let output = command.output().await?;
+
+        let parsed_output: Value = serde_json::from_slice(&output.stdout)?;
+
+        Ok(parsed_output)
     }
 }
 
@@ -77,7 +99,7 @@ async fn create_sbom(config: Config, source: Source) -> Result<(Source, Value)> 
 
     if let Some(sbom_path) = sbom_path.clone() {
         debug!("sbom is cacheable, checking for cached result");
-        if let Ok(parsed_cache) = get_sbom(sbom_path).await {
+        if let Ok(parsed_cache) = get_sbom(scan_target.clone(), sbom_path).await {
             return Ok((source, parsed_cache));
         }
     }
