@@ -74,11 +74,36 @@ pub struct ScanEntry {
     pub artifact: ScanArtifact,
 }
 
-#[derive(Clone, Debug, Hash, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default, Hash, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(default)]
 pub struct Vulnerability {
     pub id: String,
     pub severity: String,
     pub urls: Vec<String>,
+    pub description: String,
+    pub fix: Fix,
+}
+
+#[derive(Clone, Debug, Default, Hash, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct Fix {
+    pub versions: Vec<String>,
+    pub state: FixState,
+}
+
+#[derive(Clone, Debug, Default, Hash, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum FixState {
+    #[default]
+    Unknown,
+    Fixed,
+    NotFixed,
+    WontFix,
+}
+
+impl std::fmt::Display for FixState {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
