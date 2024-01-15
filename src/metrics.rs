@@ -57,7 +57,6 @@ pub fn export_metrics(
                     severity: entry.vulnerability.severity,
                     urls: entry.vulnerability.urls.join(", "),
                     cve: entry.vulnerability.id,
-                    description: entry.vulnerability.description,
                     fixed: entry.vulnerability.fix.state.to_string(),
                     fixed_versions: entry.vulnerability.fix.versions.join(", "),
                     software: entry.artifact.name,
@@ -86,7 +85,6 @@ pub struct ScanLabels {
     pub severity: String,
     pub urls: String,
     pub software: String,
-    pub description: String,
     pub fixed: String,
     pub fixed_versions: String,
     #[prometheus(flatten)]

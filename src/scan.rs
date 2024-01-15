@@ -80,7 +80,6 @@ pub struct Vulnerability {
     pub id: String,
     pub severity: String,
     pub urls: Vec<String>,
-    pub description: String,
     pub fix: Fix,
 }
 
