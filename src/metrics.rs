@@ -1,6 +1,7 @@
 use std::{collections::HashMap, fs::File, io::Write};
 
 use anyhow::Result;
+use chrono::Utc;
 use prometheus_client::{
     encoding::{text::encode, EncodeLabelSet},
     metrics::{counter::Counter, family::Family},
@@ -60,6 +61,7 @@ pub fn export_metrics(
                     fixed: entry.vulnerability.fix.state.to_string(),
                     fixed_versions: entry.vulnerability.fix.versions.join(", "),
                     software: entry.artifact.name,
+                    scan_date: Utc::now().date_naive().to_string(),
                 })
                 .inc();
         }
@@ -87,6 +89,7 @@ pub struct ScanLabels {
     pub software: String,
     pub fixed: String,
     pub fixed_versions: String,
+    pub scan_date: String,
     #[prometheus(flatten)]
     pub source: SourceLabels,
 }
