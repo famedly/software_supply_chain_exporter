@@ -114,11 +114,11 @@ async fn create_sbom(config: Config, source: Source) -> Result<(Source, Value)> 
     debug!("not using cached sbom, preparing to run syft against source");
     let mut command = Command::new("syft");
     command
-        .arg("packages")
+        .arg("scan")
         .arg("--quiet") // Supress non-error output
         .arg("-o")
         .arg("spdx-json")
-        .arg("--catalogers")
+        .arg("--override-default-catalogers")
         .arg("all")
         .env("SYFT_PARALLELISM", "1");
 
