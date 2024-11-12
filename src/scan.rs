@@ -1,6 +1,7 @@
 use std::{collections::HashMap, process::Stdio};
 
 use anyhow::Result;
+use rust_decimal::Decimal;
 use serde_json::Value;
 use tokio::{io::AsyncWriteExt, process::Command};
 use tracing::debug;
@@ -81,6 +82,28 @@ pub struct Vulnerability {
     pub severity: String,
     pub urls: Vec<String>,
     pub fix: Fix,
+    pub cvss: Vec<Cvss>,
+}
+
+#[derive(Clone, Debug, Default, Hash, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(default)]
+pub struct Cvss {
+    pub source: String,
+    #[serde(rename = "type")]
+    pub cvss_type: String,
+    pub version: String,
+    pub vector: String,
+    pub metrics: CvssMetrics,
+}
+
+#[derive(Clone, Debug, Default, Hash, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct CvssMetrics {
+    #[serde(rename = "baseScore", with = "rust_decimal::serde::float")]
+    pub base_score: Decimal,
+    #[serde(rename = "exploitabilityScore", with = "rust_decimal::serde::float")]
+    pub exploitability_score: Decimal,
+    #[serde(rename = "impactScore", with = "rust_decimal::serde::float")]
+    pub impact_score: Decimal,
 }
 
 #[derive(Clone, Debug, Default, Hash, PartialEq, Eq, serde::Serialize, serde::Deserialize)]

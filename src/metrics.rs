@@ -7,12 +7,13 @@ use prometheus_client::{
     metrics::{counter::Counter, family::Family},
     registry::Registry,
 };
+use rust_decimal::Decimal;
 use serde_json::Value;
 
 use crate::{
     config::{Config, Source},
     sbom::Sbom,
-    scan::Scan,
+    scan::{Cvss, CvssMetrics, Scan},
 };
 
 pub fn export_metrics(
@@ -31,6 +32,18 @@ pub fn export_metrics(
     let mut output = File::create(config.metrics_path())?;
 
     let mut buffer = String::new();
+
+    let cvss_fallback = Cvss {
+        source: String::from(""),
+        cvss_type: String::from(""),
+        version: String::from(""),
+        vector: String::from(""),
+        metrics: CvssMetrics {
+            base_score: Decimal::new(0, 1),
+            exploitability_score: Decimal::new(0, 1),
+            impact_score: Decimal::new(0, 1),
+        },
+    };
 
     for (source, sbom) in sboms {
         let sbom: Sbom = serde_json::from_value(sbom)?;
@@ -58,9 +71,47 @@ pub fn export_metrics(
                 entry.artifact.name,
                 entry.vulnerability.id
             );
+            let (cvss_base_score, cvss_exploitability_score, cvss_impact_score) =
+                if !entry.vulnerability.cvss.is_empty() {
+                    (
+                        entry
+                            .vulnerability
+                            .cvss
+                            .first()
+                            .unwrap_or(&cvss_fallback)
+                            .metrics
+                            .base_score
+                            .to_string(),
+                        entry
+                            .vulnerability
+                            .cvss
+                            .first()
+                            .unwrap_or(&cvss_fallback)
+                            .metrics
+                            .exploitability_score
+                            .to_string(),
+                        entry
+                            .vulnerability
+                            .cvss
+                            .first()
+                            .unwrap_or(&cvss_fallback)
+                            .metrics
+                            .impact_score
+                            .to_string(),
+                    )
+                } else {
+                    (
+                        String::from("undefined"),
+                        String::from("undefined"),
+                        String::from("undefined"),
+                    )
+                };
             grype_metrics
                 .get_or_create(&ScanLabels {
                     source,
+                    cvss_base_score,
+                    cvss_exploitability_score,
+                    cvss_impact_score,
                     title,
                     severity: entry.vulnerability.severity,
                     urls: entry.vulnerability.urls.join(", "),
@@ -91,6 +142,9 @@ pub struct SbomLabels {
 #[derive(Clone, Debug, Hash, PartialEq, Eq, EncodeLabelSet)]
 pub struct ScanLabels {
     pub cve: String,
+    pub cvss_base_score: String,
+    pub cvss_exploitability_score: String,
+    pub cvss_impact_score: String,
     pub severity: String,
     pub urls: String,
     pub software: String,
