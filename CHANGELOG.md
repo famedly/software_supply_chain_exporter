@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## [0.3.0] - 2024-11-12
 
 ### 🚀 Features
 
@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file.
 - Update dependencies
 - Replace deprecated syft command line arguments
 - Add git cliff configuration and generate changelog
+- Bump version to 0.3.0
 
 ## [0.2.3] - 2024-01-15
 
