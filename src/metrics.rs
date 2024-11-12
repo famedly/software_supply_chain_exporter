@@ -51,10 +51,17 @@ pub fn export_metrics(
 
     for (source, scan) in scans {
         for entry in scan.matches {
-            let source = source.clone().into();
+            let source: SourceLabels = source.clone().into();
+            let title: String = format!(
+                "{} {}: {}",
+                source.image.clone().unwrap_or_default(),
+                entry.artifact.name,
+                entry.vulnerability.id
+            );
             grype_metrics
                 .get_or_create(&ScanLabels {
                     source,
+                    title,
                     severity: entry.vulnerability.severity,
                     urls: entry.vulnerability.urls.join(", "),
                     cve: entry.vulnerability.id,
@@ -90,6 +97,7 @@ pub struct ScanLabels {
     pub fixed: String,
     pub fixed_versions: String,
     pub scan_date: String,
+    pub title: String,
     #[prometheus(flatten)]
     pub source: SourceLabels,
 }
