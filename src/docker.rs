@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use anyhow::Result;
-use bollard::{container::ListContainersOptions, Docker};
+use bollard::{query_parameters::ListContainersOptions, Docker};
 use itertools::Itertools;
 
 use crate::config::Source;
@@ -9,7 +9,7 @@ use crate::config::Source;
 pub async fn get_docker_images() -> Result<Vec<Source>> {
     let docker = Docker::connect_with_socket_defaults()?;
 
-    let filters: HashMap<String, Vec<String>> = HashMap::new();
+    let filters: Option<HashMap<String, Vec<String>>> = Some(HashMap::new());
 
     let options = Some(ListContainersOptions {
         all: true,
