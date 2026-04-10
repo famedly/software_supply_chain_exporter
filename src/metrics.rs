@@ -9,6 +9,7 @@ use prometheus_client::{
 };
 use rust_decimal::Decimal;
 use serde_json::Value;
+use tracing::debug;
 
 use crate::{
     config::{Config, Source},
@@ -63,7 +64,7 @@ pub fn export_metrics(
     }
 
     for (source, scan) in scans {
-        for entry in scan.matches {
+        'scan_entries: for entry in scan.matches {
             let source: SourceLabels = source.clone().into();
             let title: String = format!(
                 "{} {}: {}",
@@ -100,12 +101,19 @@ pub fn export_metrics(
                             .to_string(),
                     )
                 } else {
-                    (
-                        String::from("undefined"),
-                        String::from("undefined"),
-                        String::from("undefined"),
-                    )
+                    debug!(
+                        "{}: No CVSS, skipping vulnerability.",
+                        entry.vulnerability.id
+                    );
+                    continue 'scan_entries;
                 };
+            if entry.vulnerability.severity == "Negligible" {
+                debug!(
+                    "{}: Severity is 'Negligible', skipping vulnerability.",
+                    entry.vulnerability.id
+                );
+                continue 'scan_entries;
+            }
             grype_metrics
                 .get_or_create(&ScanLabels {
                     source,
