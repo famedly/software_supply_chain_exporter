@@ -43,7 +43,7 @@ pub async fn create_sboms(
                     sboms.insert(source, sbom);
                 }
             }
-        } else if let (Source::DockerImage { ref name, id: _ }, Some(sbom_path)) =
+        } else if let (Source::DockerImage { name, id: _ }, Some(sbom_path)) =
             (source, config.sbom_path(source))
         {
             let res = get_sbom(name.into(), sbom_path).await;
