@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.2] - 2026-04-10
+
+### 🐛 Bug Fixes
+
+- Add missing default and other for enum deserialization
+
+### ⚙️ Miscellaneous Tasks
+
+- Skip vulnerabilities without CVSS or when negligible
+- Bump version to 0.3.2
+
+### Core
+
+- Cargo fmt
+
 ## [0.3.1] - 2026-04-10
 
 ### ⚙️ Miscellaneous Tasks
