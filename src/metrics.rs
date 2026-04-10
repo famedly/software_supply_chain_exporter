@@ -3,7 +3,7 @@ use std::{collections::HashMap, fs::File, io::Write};
 use anyhow::Result;
 use chrono::Utc;
 use prometheus_client::{
-    encoding::{text::encode, EncodeLabelSet},
+    encoding::{EncodeLabelSet, text::encode},
     metrics::{counter::Counter, family::Family},
     registry::Registry,
 };
