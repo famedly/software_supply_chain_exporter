@@ -1247,7 +1247,7 @@ dependencies = [
 
 [[package]]
 name = "software_supply_chain_exporter"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "anyhow",
  "bollard",
