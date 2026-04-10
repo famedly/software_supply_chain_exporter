@@ -97,6 +97,7 @@ pub struct Cvss {
 }
 
 #[derive(Clone, Debug, Default, Hash, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(default)]
 pub struct CvssMetrics {
     #[serde(rename = "baseScore", with = "rust_decimal::serde::float")]
     pub base_score: Decimal,
@@ -107,6 +108,7 @@ pub struct CvssMetrics {
 }
 
 #[derive(Clone, Debug, Default, Hash, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(default)]
 pub struct Fix {
     pub versions: Vec<String>,
     pub state: FixState,
@@ -115,11 +117,12 @@ pub struct Fix {
 #[derive(Clone, Debug, Default, Hash, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum FixState {
-    #[default]
-    Unknown,
     Fixed,
     NotFixed,
     WontFix,
+    #[default]
+    #[serde(other)]
+    Unknown,
 }
 
 impl std::fmt::Display for FixState {
