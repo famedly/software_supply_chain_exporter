@@ -6,7 +6,7 @@ on:
       - opened
 jobs:
   add-to-project:
-    uses: famedly/github-workflows/.github/workflows/add-to-project.yml@github-v1
+    uses: famedly/github-workflows/.github/workflows/add-to-project.yml@57b383862ba81dfa265bb33d492e2bbcbc96891d
     with:
       project-url: https://github.com/orgs/famedly/projects/6
     secrets: inherit
